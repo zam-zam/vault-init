@@ -1,0 +1,30 @@
+- name: Create/update token role {{ token.role }}
+  shell: |
+    vault write auth/token/roles/{{ token.role }} \
+      orphan={{ token.orphan }} \
+      allowed_policies="{{ token.allowed_policies }}"
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ item.stdout }}"
+  with_items: "{{ root_token.results }}"
+
+- name: Issue token
+  shell: |
+    vault token create -format json \
+      -role="{{ token.role }}"
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ item.stdout }}"
+  with_items: "{{ root_token.results }}"
+  register: token_results
+
+- name: Parse output of token issue
+  set_fact:
+    token_results_parsed: "{{ item.stdout | from_json }}"
+  with_items: "{{ token_results.results }}"
+
+- name: Write token to file
+  copy:
+    content: "{{ token_results_parsed.auth.client_token }}"
+    dest: "{{ tokens_dir_output }}/{{ token.role }}"
+  delegate_to: localhost

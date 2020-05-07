@@ -1,0 +1,22 @@
+- name: Initialize Vault operator
+  shell: vault operator init -key-shares=1 -key-threshold=1 -format json
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  register: vault_init_results
+
+- name: Parse output of vault init
+  set_fact:
+    vault_init_parsed: "{{ vault_init_results.stdout | from_json }}"
+
+- name: Write unseal keys to files
+  copy:
+    dest: "{{ unseal_keys_dir_output }}/unseal_key_{{ item.0 }}"
+    content: "{{ item.1 }}"
+  with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
+  delegate_to: localhost
+
+- name: Write root token to file
+  copy:
+    content: "{{ vault_init_parsed.root_token }}"
+    dest: "{{root_token_dir_output}}/rootkey"
+  delegate_to: localhost

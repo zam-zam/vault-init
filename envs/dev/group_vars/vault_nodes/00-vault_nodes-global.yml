@@ -1,0 +1,48 @@
+vault_version: 1.4.0
+vault_architecture: amd64
+
+vault_install_remotely: true
+
+vault_enable_logrotate: true
+
+vault_address: "0.0.0.0"
+vault_port: 8200
+
+vault_ui: true
+vault_backend: file
+
+pki:
+  path: "pki"
+  max_lease_ttl: 87600h
+  ca_common_name: "vault.internal"
+  ca_ttl: "87600h"
+  roles:
+    - name: kafka
+      allow_any_name: true
+      max_ttl: 720h
+      generate_lease: true
+    - name: cassandra
+      allow_any_name: true
+      max_ttl: 720h
+      generate_lease: true
+  policies:
+    - name: common
+      rules:
+        path:
+          "pki/issue/kafka":
+            capabilities:
+              - create
+              - read
+              - update
+              - list
+          "pki/issue/cassandra":
+            capabilities:
+              - create
+              - read
+              - update
+              - list
+  tokens:
+    - role: common
+      orphan: true
+      renewable: false
+      allowed_policies: "common"

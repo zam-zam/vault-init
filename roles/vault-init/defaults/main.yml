@@ -1,0 +1,40 @@
+vault_addr: "http://127.0.0.1:8200"
+
+pki:
+  path: "pki"
+  max_lease_ttl: 87600h
+  ca_common_name: "vault.internal"
+  ca_ttl: "87600h"
+  # roles:
+  #   - name: kafka
+  #     allow_any_name: true
+  #     max_ttl: 720h
+  #     generate_lease: true
+  #   - name: cassandra
+  #     allow_any_name: true
+  #     max_ttl: 720h
+  #     generate_lease: true
+  # policies:
+  #   - name: common
+  #     rules:
+  #       path:
+  #         "pki/issue/kafka":
+  #           capabilities:
+  #             - create
+  #         "pki/issue/cassandra":
+  #           capabilities:
+  #             - create
+  # tokens:
+  #   - role: common
+  #     orphan: true
+  #     renewable: false
+  #     allowed_policies: "common"
+  #   - role: second
+  #     orphan: true
+  #     renewable: false
+  #     allowed_policies: "common"
+
+unseal_keys_dir_output: "{{ playbook_dir }}/tokens/vault/{{ inventory_dir | basename }}/unseal_keys"
+root_token_dir_output: "{{ playbook_dir }}/tokens/vault/{{ inventory_dir | basename }}/root_token"
+
+tokens_dir_output: "{{ playbook_dir | dirname }}/tokens/vault/{{ inventory_dir | basename }}/tokens"

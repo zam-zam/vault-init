@@ -1,0 +1,10 @@
+- name: Create pki role {{ role.name }}
+  shell: |
+    vault write {{ pki.path }}/roles/{{ role.name }} \
+      allow_any_name={{ role.allow_any_name }} \
+      max_ttl={{ role.max_ttl }} \
+      generate_lease={{ role.generate_lease }}
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+    VAULT_TOKEN: "{{ item.stdout }}"
+  with_items: "{{ root_token.results }}"

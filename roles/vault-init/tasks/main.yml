@@ -1,0 +1,55 @@
+- name: Create unseal directories
+  file:
+    path: "{{ unseal_keys_dir_output }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Create root key directories
+  file:
+    path: "{{ root_token_dir_output }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Create tokens directories
+  file:
+    path: "{{ tokens_dir_output }}"
+    state: directory
+  delegate_to: localhost
+
+
+- name: Check Initialization status
+  shell: vault status -format json
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  register: vault_status
+  failed_when: vault_status.rc == 1
+
+- name: Parse output of vault status
+  set_fact:
+    vault_status_parsed: "{{ vault_status.stdout | from_json }}"
+
+- name: Init vault
+  include: init.yml
+  when: not vault_status_parsed.initialized
+
+- name: Unseal vault
+  include: unseal.yml
+  when: vault_status_parsed.sealed
+
+- name: Setup pki
+  include: setup.yml
+
+- include_tasks: roles.yml
+  loop: "{{ pki.roles }}"
+  loop_control:
+    loop_var: role
+
+- include_tasks: policies.yml
+  loop: "{{ pki.policies }}"
+  loop_control:
+    loop_var: policy
+
+- include_tasks: tokens.yml
+  loop: "{{ pki.tokens }}"
+  loop_control:
+    loop_var: token
