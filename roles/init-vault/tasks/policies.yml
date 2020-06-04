@@ -1,0 +1,6 @@
+- name: Create {{ policies.name }}
+  shell: |
+    echo '{{ policy.rules | to_json }}' | VAULT_TOKEN="{{ vault_root_token }}" vault policy write "{{ policy.name }}" -
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  no_log: true

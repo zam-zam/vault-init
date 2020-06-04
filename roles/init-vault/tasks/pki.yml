@@ -1,0 +1,28 @@
+- name: Enable pki secret
+  shell: |
+    VAULT_TOKEN="{{ vault_root_token }}" \
+    vault secrets enable -path {{ pki_path }} pki
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  register: enable_results
+  failed_when: "enable_results.rc == 2 and 'path is already in use' not in enable_results.stderr"
+  changed_when: "enable_results.rc == 0"
+  no_log: true
+
+- name: Tune pki path
+  shell: |
+    VAULT_TOKEN="{{ vault_root_token }}" \
+    vault secrets tune -max-lease-ttl={{ pki_max_lease_ttl }} {{ pki_path }}
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  no_log: true
+
+- name: Generate internal CA
+  uri:
+    url: "{{ vault_addr }}/v1/pki/root/generate/internal"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_root_token }}"
+    body_format: json
+    body: "{{ pki_ca | to_json }}"
+  no_log: true

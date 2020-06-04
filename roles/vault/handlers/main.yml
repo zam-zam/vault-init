@@ -1,0 +1,8 @@
+---
+# handlers file for vault
+
+- name: Restart vault
+  become: true
+  systemd:
+    name: vault
+    state: restarted

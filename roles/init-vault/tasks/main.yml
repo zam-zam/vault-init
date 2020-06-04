@@ -16,7 +16,6 @@
     state: directory
   delegate_to: localhost
 
-
 - name: Check Initialization status
   shell: vault status -format json
   environment:
@@ -37,19 +36,19 @@
   when: vault_status_parsed.sealed
 
 - name: Setup pki
-  include: setup.yml
+  include: pki.yml
 
 - include_tasks: roles.yml
-  loop: "{{ pki.roles }}"
+  loop: "{{ pki_roles }}"
   loop_control:
     loop_var: role
 
 - include_tasks: policies.yml
-  loop: "{{ pki.policies }}"
+  loop: "{{ pki_policies }}"
   loop_control:
     loop_var: policy
 
 - include_tasks: tokens.yml
-  loop: "{{ pki.tokens }}"
+  loop: "{{ pki_tokens }}"
   loop_control:
     loop_var: token

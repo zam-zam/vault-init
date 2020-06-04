@@ -1,21 +1,10 @@
-vault_version: 1.4.0
-vault_architecture: amd64
-
-vault_install_remotely: true
-
-vault_enable_logrotate: true
-
-vault_address: "0.0.0.0"
-vault_port: 8200
-
-vault_ui: true
-vault_backend: file
+vault_addr: "http://127.0.0.1:8200"
 
 pki_path: "pki"
 pki_max_lease_ttl: 87600h
 pki_ca:
   type: internal
-  common_name: "service.internal"
+  common_name: "services.internal"
   ttl: 87600h
 pki_roles:
   - name: internal_communication
@@ -42,3 +31,12 @@ pki_tokens:
       orphan: true
       renewable: false
       token_explicit_max_ttl: "8640h"
+
+base_dir_output: "{{ playbook_dir | dirname | dirname }}/tokens/vault/{{ inventory_dir | basename }}"
+
+unseal_keys_dir_output: "{{ base_dir_output }}/unseal_keys"
+root_token_dir_output: "{{ base_dir_output }}/root_token"
+tokens_dir_output: "{{ base_dir_output }}/tokens"
+
+#vault_unseal_key: ""
+#vault_root_token: ""

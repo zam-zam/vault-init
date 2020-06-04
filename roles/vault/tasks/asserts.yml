@@ -1,0 +1,7 @@
+---
+# File: tasks/asserts.yml - Asserts for this role
+
+- name: Check for vault_redirect_address usage
+  debug:
+    msg: "vault_redirect_address is deprecated. Check for vault_api_addr in the README."
+  when: vault_redirect_address is defined

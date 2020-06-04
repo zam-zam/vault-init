@@ -1,0 +1,25 @@
+- name: Reading unseal key from file
+  command: cat {{ item }}
+  register: unseal_keys
+  with_fileglob: "{{ unseal_keys_dir_output }}/*"
+  delegate_to: localhost
+  become: no
+  when: vault_unseal_key is not defined
+  no_log: true
+
+- name: Unseal vault with unseal keys from file
+  shell: |
+    echo "{{ item.stdout }}" | xargs vault operator unseal
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  with_items: "{{ unseal_keys.results }}"
+  when: vault_unseal_key is not defined
+  no_log: true
+
+- name: Unseal vault with unseal keys from variable
+  shell: |
+    echo "{{ vault_unseal_key }}" | xargs vault operator unseal
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  when: vault_unseal_key is defined
+  no_log: true

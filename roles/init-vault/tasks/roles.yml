@@ -1,0 +1,11 @@
+- name: Create pki role {{ role.name }}
+  uri:
+    url: "{{ vault_addr }}/v1/{{ pki_path }}/roles/{{ role.name }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_root_token }}"
+    body_format: json
+    body: "{{ role.settings | to_json }}"
+  register: create_role
+  failed_when: "create_role.status not in [200, 204]"
+  no_log: true

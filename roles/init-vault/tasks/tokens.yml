@@ -1,0 +1,33 @@
+- name: Create/update token role {{ token.role_name }}
+  uri:
+    url: "{{ vault_addr }}/v1/auth/token/roles/{{ token.role_name }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_root_token }}"
+    body_format: json
+    body: "{{ token.settings | to_json }}"
+  register: create_token_role
+  failed_when: "create_token_role.status not in [200, 204]"
+  no_log: true
+
+- name: Issue token
+  shell: |
+    VAULT_TOKEN="{{ vault_root_token }}" \
+    vault token create -format json \
+      -role="{{ token.role_name }}"
+  environment:
+    VAULT_ADDR: "{{ vault_addr }}"
+  register: token_results
+  no_log: true
+
+- name: Parse output of token issue
+  set_fact:
+    token_results_parsed: "{{ token_results.stdout | from_json }}"
+  no_log: true
+
+- name: Write token to file
+  copy:
+    content: "{{ token_results_parsed.auth.client_token }}"
+    dest: "{{ tokens_dir_output }}/{{ token.role_name }}"
+  delegate_to: localhost
+  no_log: true
